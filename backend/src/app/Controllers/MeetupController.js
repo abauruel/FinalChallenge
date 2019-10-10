@@ -1,5 +1,7 @@
 import * as Yup from 'yup';
 import { isBefore, parseISO } from 'date-fns';
+import Path from 'path';
+import fs from 'fs';
 import Meetup from '../models/Meetup';
 import File from '../models/File';
 import User from '../models/User';
@@ -107,7 +109,7 @@ class MeetupController {
       await imagem.update({ name, path });
 
       meetup.update(req.body);
-      return res.json(meetup);
+      return res.json(imagem);
     }
 
     meetup.update(req.body);
@@ -115,7 +117,36 @@ class MeetupController {
     return res.json(meetup);
   }
 
-  async delete(req, res) {}
+  async delete(req, res) {
+    const path = Path.resolve(__dirname, '..', '..', '..', 'tmp', 'upload');
+    console.log(path);
+    const { id: idMeetup } = req.params;
+    const sponsor = req.userId;
+
+    const meetup = await Meetup.findOne({
+      where: { id: idMeetup, user_id: sponsor },
+    });
+
+    if (!meetup) {
+      return res.status(401).json({ error: 'Only sponsor can cancel' });
+    }
+
+    if (isBefore(meetup.data, new Date())) {
+      return res.status(401).json({
+        error: 'Is not possible cancel because the event date is passed',
+      });
+    }
+    const imagem = await File.findByPk(meetup.imagem);
+    await fs.unlink(`${path}/${imagem.path}`, err => {
+      if (err) {
+        console.log(err);
+      }
+    });
+
+    await meetup.destroy();
+    await imagem.destroy();
+    return res.status(200).send();
+  }
 }
 
 export default new MeetupController();
