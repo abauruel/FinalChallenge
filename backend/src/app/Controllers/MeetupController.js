@@ -103,7 +103,8 @@ class MeetupController {
     if (req.file) {
       const { originalname: name, filename: path } = req.file;
       const imagem = await File.findByPk(meetup.imagem);
-      imagem.update(name, path);
+
+      await imagem.update({ name, path });
 
       meetup.update(req.body);
       return res.json(meetup);
