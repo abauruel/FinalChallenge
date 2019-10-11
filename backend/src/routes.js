@@ -6,6 +6,7 @@ import SessionController from './app/Controllers/SessionController';
 import AuthMiddleware from './app/Middlewares/Auth';
 import FileController from './app/Controllers/FileController';
 import MeetupController from './app/Controllers/MeetupController';
+import SubscriptionController from './app/Controllers/SubscriptionController';
 
 const routes = new Router();
 
@@ -20,5 +21,6 @@ routes.get('/meetups', MeetupController.index);
 routes.post('/meetup', upload.single('picture'), MeetupController.store);
 routes.put('/meetup/:id', upload.single('picture'), MeetupController.update);
 routes.delete('/meetup/:id', MeetupController.delete);
+routes.post('/meetup/:id/subscription', SubscriptionController.store);
 
 export default routes;
