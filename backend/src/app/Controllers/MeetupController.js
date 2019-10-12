@@ -119,7 +119,6 @@ class MeetupController {
 
   async delete(req, res) {
     const path = Path.resolve(__dirname, '..', '..', '..', 'tmp', 'upload');
-    console.log(path);
     const { id: idMeetup } = req.params;
     const sponsor = req.userId;
 
