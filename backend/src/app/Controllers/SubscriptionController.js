@@ -19,10 +19,16 @@ class SubscriptionController {
       return res.status(401).json({ erro: 'user already registered' });
     }
 
-    const meetup = await Meetup.findByPk(idMeetup);
+    const meetup = await Meetup.findOne({
+      where: {
+        id: idMeetup,
+      },
+      include: [{ model: User, attributes: ['email'] }],
+    });
     if (!meetup) {
       return res.status(401).json({ error: 'Meetup is not exist' });
     }
+
     if (meetup.user_id === req.userId) {
       return res
         .status(401)
@@ -57,25 +63,26 @@ class SubscriptionController {
         .json({ erro: 'User registered in another meetup on the same date' });
     }
 
-    const subscription = await Subscription.create({
-      user_id: req.userId,
-      meetup_id: idMeetup,
-    });
+    // const subscription = await Subscription.create({
+    //   user_id: req.userId,
+    //   meetup_id: idMeetup,
+    // });
 
-    const user = await User.findByPk(subscription.user_id);
+    const user = await User.findByPk(req.userId);
 
     await Mail.sendMail({
-      to: `${user.name} <${user.email}>`,
-      subject: 'Confirmacao de Inscricao',
+      to: meetup.User.email,
+      subject: 'Novo Inscrito',
       template: 'ConfirmationSubscription',
       context: {
         provider: user.name,
         meetup: meetup.titulo,
-        data: format(meetup.data, "'dia' dd 'de' MMMM', as' H:mm'h'"),
+        date: format(meetup.data, "'dia' dd 'de' MMMM', as' H:mm'h'"),
+        user,
       },
     });
 
-    return res.json(subscription);
+    return res.json(meetup);
   }
 }
 
