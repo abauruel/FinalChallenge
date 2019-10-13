@@ -22,5 +22,6 @@ routes.post('/meetup', upload.single('picture'), MeetupController.store);
 routes.put('/meetup/:id', upload.single('picture'), MeetupController.update);
 routes.delete('/meetup/:id', MeetupController.delete);
 routes.post('/meetup/:id/subscription', SubscriptionController.store);
+routes.get('/meetup/subscriptions', SubscriptionController.index);
 
 export default routes;

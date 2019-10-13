@@ -4,6 +4,7 @@ import Subscription from '../models/Subscription';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
 import Mail from '../../lib/Mail';
+import File from '../models/File';
 
 class SubscriptionController {
   async store(req, res) {
@@ -63,10 +64,10 @@ class SubscriptionController {
         .json({ erro: 'User registered in another meetup on the same date' });
     }
 
-    // const subscription = await Subscription.create({
-    //   user_id: req.userId,
-    //   meetup_id: idMeetup,
-    // });
+    const subscription = await Subscription.create({
+      user_id: req.userId,
+      meetup_id: idMeetup,
+    });
 
     const user = await User.findByPk(req.userId);
 
@@ -82,6 +83,25 @@ class SubscriptionController {
       },
     });
 
+    return res.json(subscription);
+  }
+
+  async index(req, res) {
+    const meetup = await Meetup.findAll({
+      include: [
+        {
+          model: Subscription,
+          attributes: [],
+          where: {
+            user_id: req.userId,
+          },
+        },
+        {
+          model: File,
+          attributes: ['url', 'path'],
+        },
+      ],
+    });
     return res.json(meetup);
   }
 }
